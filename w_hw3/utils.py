@@ -1,7 +1,7 @@
 import pickle
 
 
-def list_save(content, filename, mode='wb'):
+def list_save(content, filename, mode='w'):
     if type(content) is not list:
         raise TypeError("expect list")
     file = open(filename, mode)
