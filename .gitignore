@@ -2,3 +2,4 @@ dcgan/data
 data
 *.pyc
 OpenNMT/data
+w_hw3/model_dir
