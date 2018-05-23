@@ -5,12 +5,11 @@ import os
 import torch
 import torch.nn as nn
 import torch.onnx
-import w_hw3.model
-import w_hw3.data
+import model
+import data
 
 import time
 
-from w_hw3.data import Corpus
 
 start = time.time()
 print("start!====")
@@ -73,7 +72,7 @@ device = torch.device("cuda" if args.cuda else "cpu")
 if not os.path.exists(args.save):
     os.makedirs(args.save)
 
-corpus = Corpus()
+corpus = data.Corpus()
 corpus.set_train(os.path.join(args.data, 'train.txt'), args.train_size)
 corpus.set_valid(os.path.join(args.data, 'valid.txt'), args.valid_size)
 corpus.save_dictionary(os.path.join(args.save, 'rnn_model_dict'))
@@ -110,7 +109,7 @@ val_data = batchify(corpus.valid, eval_batch_size)
 ###############################################################################
 
 ntokens = len(corpus.dictionary)
-model = w_hw3.model.RNNModel(args.model, ntokens, args.emsize, args.nhid, args.nlayers, args.dropout, args.tied).to(
+model = model.RNNModel(args.model, ntokens, args.emsize, args.nhid, args.nlayers, args.dropout, args.tied).to(
     device)
 
 criterion = nn.CrossEntropyLoss()
@@ -249,7 +248,7 @@ print("total time %d" % (end - start))
 print('=' * 89)
 print("start test result")
 test_eval_batch_size = 10
-test_corpus = Corpus()
+test_corpus = data.Corpus()
 
 test_corpus.load_dictionary(os.path.join(args.save, 'rnn_model_dict'))
 test_corpus.set_test(os.path.join(args.data, 'test.txt'), test_size=args.test_size)

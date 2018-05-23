@@ -1,6 +1,6 @@
 import os
 import torch
-import w_hw3.utils
+import utils
 
 
 class Dictionary(object):
@@ -18,12 +18,12 @@ class Dictionary(object):
         return len(self.idx2word)
 
     def save_dict(self, path):
-        w_hw3.utils.list_save(self.idx2word, path + "_dict_idx2word")
-        w_hw3.utils.dict_save(self.word2idx, path + "_dict_word2idx")
+        utils.list_save(self.idx2word, path + "_dict_idx2word")
+        utils.dict_save(self.word2idx, path + "_dict_word2idx")
 
     def load_dict(self, path):
-        self.idx2word = w_hw3.utils.list_load(path + "_dict_idx2word")
-        self.word2idx = w_hw3.utils.dict_load(path + "_dict_word2idx")
+        self.idx2word = utils.list_load(path + "_dict_idx2word")
+        self.word2idx = utils.dict_load(path + "_dict_word2idx")
 
 
 class Corpus(object):
