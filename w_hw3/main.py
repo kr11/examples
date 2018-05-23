@@ -1,16 +1,17 @@
 # coding: utf-8
 import argparse
-import time
 import math
 import os
 import torch
 import torch.nn as nn
 import torch.onnx
 
-import data
-import model
+import word_language_model.model
 
 import time
+
+from word_language_model.data import Corpus
+
 start = time.time()
 print("start!====")
 parser = argparse.ArgumentParser(description='PyTorch Wikitext-2 RNN/LSTM Language Model')
@@ -62,7 +63,7 @@ device = torch.device("cuda" if args.cuda else "cpu")
 # Load data
 ###############################################################################
 
-corpus = data.Corpus(args.data)
+corpus = Corpus(args.data)
 
 # Starting from sequential data, batchify arranges the dataset into columns.
 # For instance, with the alphabet as the sequence and batch size 4, we'd get
@@ -95,7 +96,7 @@ test_data = batchify(corpus.test, eval_batch_size)
 ###############################################################################
 
 ntokens = len(corpus.dictionary)
-model = model.RNNModel(args.model, ntokens, args.emsize, args.nhid, args.nlayers, args.dropout, args.tied).to(device)
+model = word_language_model.model.RNNModel(args.model, ntokens, args.emsize, args.nhid, args.nlayers, args.dropout, args.tied).to(device)
 
 criterion = nn.CrossEntropyLoss()
 
@@ -234,4 +235,4 @@ if len(args.onnx_export) > 0:
     export_onnx(args.onnx_export, batch_size=1, seq_len=args.bptt)
 
 end = time.time()
-print("total time %d" % (end -start))
+print("total time %d" % (end - start))

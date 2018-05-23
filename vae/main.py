@@ -7,7 +7,9 @@ from torch.nn import functional as F
 from torchvision import datasets, transforms
 from torchvision.utils import save_image
 
+import time
 
+start = time.time()
 parser = argparse.ArgumentParser(description='VAE MNIST Example')
 parser.add_argument('--batch-size', type=int, default=128, metavar='N',
                     help='input batch size for training (default: 128)')
@@ -134,3 +136,5 @@ for epoch in range(1, args.epochs + 1):
         sample = model.decode(sample).cpu()
         save_image(sample.view(64, 1, 28, 28),
                    'results/sample_' + str(epoch) + '.png')
+end = time.time()
+print("total time: %d" % (start - end))
