@@ -49,7 +49,7 @@ def get_args_parser():
                         help='type of recurrent net (RNN_TANH, RNN_RELU, LSTM, GRU)')
     parser.add_argument('--emsize', type=int, default=200,
                         help='size of word embeddings')
-    parser.add_argument('--nhid', type=int, default=200,
+    parser.add_argument('--nhid', type=int, default=50,
                         help='number of hidden units per layer')
     parser.add_argument('--nlayers', type=int, default=2,
                         help='number of layers')
@@ -57,7 +57,7 @@ def get_args_parser():
                         help='initial learning rate')
     parser.add_argument('--clip', type=float, default=0.25,
                         help='gradient clipping')
-    parser.add_argument('--epochs', type=int, default=40,
+    parser.add_argument('--epochs', type=int, default=2,
                         help='upper epoch limit')
     parser.add_argument('--batch_size', type=int, default=20, metavar='N',
                         help='batch size')
@@ -71,15 +71,15 @@ def get_args_parser():
                         help='random seed')
     parser.add_argument('--cuda', action='store_true',
                         help='use CUDA')
-    parser.add_argument('--log-interval', type=int, default=200, metavar='N',
+    parser.add_argument('--log-interval', type=int, default=2, metavar='N',
                         help='report interval')
     parser.add_argument('--save', type=str, default='model_dir',
                         help='path to save the final model and dictionary')
-    parser.add_argument('--train_size', type=int, default=-1, metavar='N',
+    parser.add_argument('--train_size', type=int, default=200, metavar='N',
                         help='train size')
-    parser.add_argument('--valid_size', type=int, default=-1, metavar='N',
+    parser.add_argument('--valid_size', type=int, default=50, metavar='N',
                         help='valid size')
-    parser.add_argument('--test_size', type=int, default=-1, metavar='N',
+    parser.add_argument('--test_size', type=int, default=50, metavar='N',
                         help='test size')
 
     args = parser.parse_args()
