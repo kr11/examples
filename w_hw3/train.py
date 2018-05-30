@@ -117,11 +117,11 @@ try:
         epoch_start_time = time.time()
         train_ppl = train()
         val_loss = utils.evaluate(val_data, model, corpus, criterion, args, eval_batch_size)
-        print('-' * 89)
+        print('-' * 80)
         print('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.2f} | '
               'valid ppl {:8.2f}'.format(epoch, (time.time() - epoch_start_time),
                                          val_loss, math.exp(val_loss)))
-        print('-' * 89)
+        print('-' * 80)
         # Save the model if the validation loss is the best we've seen so far.
         if not best_val_loss or val_loss < best_val_loss:
             with open(os.path.join(args.save, 'model.pt'), 'wb') as f:
@@ -130,11 +130,11 @@ try:
         else:
             lr /= 4.0
         result.append((epoch, train_ppl, math.exp(val_loss)))
-        # print for figure plotting
-        print('epoch\ttrain-ppl\tvalid-ppl')
-        for line in result:
-            print('%d\t%.3f\t%.3f' % (line[0], line[1], line[2]))
+    # print for figure plotting
+    print('epoch\ttrain-ppl\tvalid-ppl')
+    for line in result:
+        print('%d\t%.3f\t%.3f' % (line[0], line[1], line[2]))
 
 except KeyboardInterrupt:
-    print('-' * 89)
+    print('-' * 80)
     print('Exiting from training early')
