@@ -30,7 +30,8 @@ device = utils.check_device(args)
 
 with open(os.path.join(args.save, 'model.pt'), 'rb') as f:
     rnn_model = torch.load(f)
-    rnn_model.rnn.flatten_parameters()
+    if hasattr(rnn_model, 'rnn'):
+        rnn_model.rnn.flatten_parameters()
     criterion = nn.CrossEntropyLoss()
 
 test_corpus = data.Corpus()
@@ -40,6 +41,6 @@ test_corpus.set_test(os.path.join(args.data, 'test.txt'), test_size=args.test_si
 test_data = utils.batchify(test_corpus.test, eval_batch_size, device)
 test_loss = utils.evaluate(test_data, rnn_model, test_corpus, criterion, args, eval_batch_size)
 
-print('=' * 89)
+print('=' * 80)
 print('| End of training | time: %5.2f s | test loss %5.2f | test ppl %8.2f'
       % ((time.time() - start), test_loss, math.exp(test_loss)))
