@@ -82,7 +82,7 @@ def get_args_parser():
     parser.add_argument('--test_size', type=int, default=-1, metavar='N',
                         help='test size')
 
-    parser.add_argument('--use_my_impl', type=bool, default=True, metavar='N',
+    parser.add_argument('--use_my_impl', action='store_true',
                         help='use my implement')
 
     args = parser.parse_args()
