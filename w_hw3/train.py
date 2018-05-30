@@ -77,10 +77,7 @@ def train():
         # If we didn't, the model would try backpropagating all the way to start of the dataset.
         hidden = utils.repackage_hidden(hidden)
         model.zero_grad()
-        if args.use_my_impl:
-            output, hidden = model.forward(data, hidden)
-        else:
-            output, hidden = model(data, hidden)
+        output, hidden = model(data, hidden)
         loss = criterion(output.view(-1, ntokens), targets)
         # loss.backward() computes dloss/dx for every parameter x which has requires_grad=True.
         loss.backward()

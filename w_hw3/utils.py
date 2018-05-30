@@ -130,10 +130,7 @@ def evaluate(data_source, model, corpus, criterion, args, eval_batch_size):
     with torch.no_grad():
         for i in range(0, data_source.size(0) - 1, args.bptt):
             data, targets = get_batch(args, data_source, i)
-            if args.use_my_impl:
-                output, hidden = model.forward(data, hidden)
-            else:
-                output, hidden = model(data, hidden)
+            output, hidden = model(data, hidden)
             output_flat = output.view(-1, ntokens)
             total_loss += len(data) * criterion(output_flat, targets).item()
             hidden = repackage_hidden(hidden)

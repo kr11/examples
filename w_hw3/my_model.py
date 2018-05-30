@@ -1,3 +1,4 @@
+import math
 import torch
 import torch.nn as nn
 from torch.nn import Parameter
@@ -13,7 +14,6 @@ class MyGRUModel(nn.Module):
         self.drop = nn.Dropout(dropout)
         self.encoder = nn.Embedding(n_token, n_input)
         self.decoder = nn.Linear(n_hid, n_token)
-        self.init_weights()
 
         self.rnn_type = 'GRU'
         self.n_hid = n_hid
@@ -21,23 +21,39 @@ class MyGRUModel(nn.Module):
         self.training = True
 
         # init RNN
-        self.w_inputs = []
-        self.w_hiddens = []
-        self.b_inputs = []
-        self.b_hiddens = []
+        # self.w_inputs = []
+        # self.w_hiddens = []
+        # self.b_inputs = []
+        # self.b_hiddens = []
         gate_size = 3 * n_hid
-        # self._all_weights = []
+        self._all_weights = []
         for layer in range(n_layers):
             layer_input_size = n_input if layer == 0 else n_hid
-            self.w_inputs.append(Parameter(torch.Tensor(gate_size, layer_input_size)))
-            self.w_hiddens.append(Parameter(torch.Tensor(gate_size, n_hid)))
-            self.b_inputs.append(Parameter(torch.Tensor(gate_size)))
-            self.b_hiddens.append(Parameter(torch.Tensor(gate_size)))
-            layer_params = [self.w_inputs[layer], self.w_hiddens[layer], self.b_inputs[layer], self.b_hiddens[layer]]
-        #     self._all_weights += layer_params
-        # self._all_weights.append(self.drop)
-        # self._all_weights.append(self.encoder)
-        # self._all_weights.append(self.decoder)
+            w_ih = Parameter(torch.Tensor(gate_size, layer_input_size))
+            w_hh = Parameter(torch.Tensor(gate_size, n_hid))
+            b_ih = Parameter(torch.Tensor(gate_size))
+            b_hh = Parameter(torch.Tensor(gate_size))
+            layer_params = (w_ih, w_hh, b_ih, b_hh)
+
+            suffix = ''
+            param_names = ['weight_ih_l{}{}', 'weight_hh_l{}{}']
+            param_names += ['bias_ih_l{}{}', 'bias_hh_l{}{}']
+            param_names = [x.format(layer, suffix) for x in param_names]
+
+            for name, param in zip(param_names, layer_params):
+                setattr(self, name, param)
+            self._all_weights.append(param_names)
+
+        self.reset_parameters()
+        self.init_weights()
+
+    def get_all_weights(self):
+        return [[getattr(self, weight) for weight in weights] for weights in self._all_weights]
+
+    def reset_parameters(self):
+        stdv = 1.0 / math.sqrt(self.n_hid)
+        for weight in self.parameters():
+            weight.data.uniform_(-stdv, stdv)
 
     def init_weights(self):
         initrange = 0.1
@@ -81,7 +97,8 @@ class MyGRUModel(nn.Module):
         return decoded.view(output.size(0), output.size(1), decoded.size(1)), hidden
 
     def init_hidden(self, bsz):
-        return self.w_hiddens[0].new_zeros(self.n_layers, bsz, self.n_hid)
+        # return self.w_hiddens[0].new_zeros(self.n_layers, bsz, self.n_hid)
+        return next(self.parameters()).new_zeros(self.n_layers, bsz, self.n_hid)
 
     def process_layers(self, input, hidden):
         next_hidden = []
@@ -117,10 +134,18 @@ class MyGRUModel(nn.Module):
         return hidden, output
 
     def process_step(self, input, hidden, layer):
-        w_input = self.w_inputs[layer]
-        w_hidden = self.w_hiddens[layer]
-        b_input = self.b_inputs[layer]
-        b_hidden = self.b_hiddens[layer]
+        tmp = self.get_all_weights()
+        w_input = tmp[layer][0]
+        w_hidden = tmp[layer][1]
+        b_input = tmp[layer][2]
+        b_hidden = tmp[layer][3]
+
+        # (w_ih, w_hh, b_ih, b_hh)
+
+        # w_input = self.w_inputs[layer]
+        # w_hidden = self.w_hiddens[layer]
+        # b_input = self.b_inputs[layer]
+        # b_hidden = self.b_hiddens[layer]
         gi = F.linear(input, w_input, b_input)
         gh = F.linear(hidden, w_hidden, b_hidden)
         i_r, i_i, i_n = gi.chunk(3, 1)
