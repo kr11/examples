@@ -5,12 +5,14 @@ import sys
 import torch
 import torch.nn as nn
 
-from w_hw3.my_model import MyGRUModel
-
+# from w_hw3.my_model import MyGRUModel
+import my_model
 sys.path.append('../')
 sys.path.append('../w_hw3')
-import w_hw3.model as model
-import w_hw3.utils as utils
+# import w_hw3.model as model
+import model
+# import w_hw3.utils as utils
+import utils
 import data
 
 import time
@@ -24,7 +26,8 @@ args = utils.get_args_parser()
 # Set the random seed manually for reproducibility.
 torch.manual_seed(args.seed)
 device = utils.check_device(args)
-
+if args.use_my_impl:
+    print("train by my implement!")
 ###############################################################################
 # Load data
 ###############################################################################
@@ -45,7 +48,7 @@ val_data = utils.batchify(corpus.valid, eval_batch_size, device)
 
 ntokens = len(corpus.dictionary)
 if args.use_my_impl:
-    model = MyGRUModel(args.model, ntokens, args.emsize, args.nhid, args.nlayers, args.dropout, args.tied)
+    model = my_model.MyGRUModel(args.model, ntokens, args.emsize, args.nhid, args.nlayers, args.dropout, args.tied)
 else:
     model = model.RNNModel(args.model, ntokens, args.emsize, args.nhid, args.nlayers, args.dropout, args.tied).to(device)
 
