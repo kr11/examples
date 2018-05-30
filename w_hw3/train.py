@@ -18,11 +18,18 @@ import data
 import time
 
 start = time.time()
-print("start!====")
 
 # prepare
 eval_batch_size = 10
 args = utils.get_args_parser()
+print('\n')
+print('V ' * 80)
+print('\n')
+print(args)
+print('\n')
+print('#' * 80)
+print("start!====")
+
 # Set the random seed manually for reproducibility.
 torch.manual_seed(args.seed)
 device = utils.check_device(args)
@@ -98,8 +105,8 @@ def train():
                               elapsed * 1000 / args.log_interval, cur_loss, math.exp(cur_loss)))
             total_loss = 0
             start_time = time.time()
-            if ret_ppl is None:
-                ret_ppl = math.exp(cur_loss)
+            # if ret_ppl is None:
+            ret_ppl = math.exp(cur_loss)
     return ret_ppl
 
 
