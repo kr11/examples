@@ -4,6 +4,52 @@ import argparse
 import torch
 
 
+def get_args_parser():
+    parser = argparse.ArgumentParser(description='PyTorch RNN/LSTM Language Model')
+    parser.add_argument('--data', type=str, default='./data/ptb',
+                        help='location of the data corpus')
+    parser.add_argument('--model', type=str, default='GRU',
+                        help='type of recurrent net (LSTM, GRU)')
+    parser.add_argument('--nembed', type=int, default=200,
+                        help='size of word embeddings')
+    parser.add_argument('--nhid', type=int, default=200,
+                        help='number of hidden units per layer')
+    parser.add_argument('--nlayers', type=int, default=2,
+                        help='number of layers')
+    parser.add_argument('--lr', type=float, default=20,
+                        help='initial learning rate')
+    parser.add_argument('--clip', type=float, default=0.25,
+                        help='gradient clipping')
+    parser.add_argument('--epochs', type=int, default=20,
+                        help='upper epoch limit')
+    parser.add_argument('--batch_size', type=int, default=20, metavar='N',
+                        help='batch size')
+    parser.add_argument('--bptt', type=int, default=35,
+                        help='sequence length')
+    parser.add_argument('--dropout', type=float, default=0.2,
+                        help='dropout applied to layers (0 = no dropout)')
+
+    parser.add_argument('--seed', type=int, default=1111,
+                        help='random seed')
+    parser.add_argument('--cuda', action='store_true',
+                        help='use CUDA')
+    parser.add_argument('--log-interval', type=int, default=200, metavar='N',
+                        help='report interval')
+    parser.add_argument('--save', type=str, default='model_dir',
+                        help='path to save the final model and dictionary')
+    parser.add_argument('--train_size', type=int, default=-1, metavar='N',
+                        help='train size')
+    parser.add_argument('--valid_size', type=int, default=-1, metavar='N',
+                        help='valid size')
+    parser.add_argument('--test_size', type=int, default=-1, metavar='N',
+                        help='test size')
+    parser.add_argument('--use_my_impl', action='store_true',
+                        help='use my implement')
+
+    args = parser.parse_args()
+    return args
+
+
 def list_save(content, filename, mode='w'):
     if type(content) is not list:
         raise TypeError("expect list")
@@ -41,54 +87,6 @@ def dict_load(filename):
     return content
 
 
-def get_args_parser():
-    parser = argparse.ArgumentParser(description='PyTorch RNN/LSTM Language Model')
-    parser.add_argument('--data', type=str, default='./data/ptb',
-                        help='location of the data corpus')
-    parser.add_argument('--model', type=str, default='LSTM',
-                        help='type of recurrent net (RNN_TANH, RNN_RELU, LSTM, GRU)')
-    parser.add_argument('--emsize', type=int, default=200,
-                        help='size of word embeddings')
-    parser.add_argument('--nhid', type=int, default=200,
-                        help='number of hidden units per layer')
-    parser.add_argument('--nlayers', type=int, default=2,
-                        help='number of layers')
-    parser.add_argument('--lr', type=float, default=20,
-                        help='initial learning rate')
-    parser.add_argument('--clip', type=float, default=0.25,
-                        help='gradient clipping')
-    parser.add_argument('--epochs', type=int, default=40,
-                        help='upper epoch limit')
-    parser.add_argument('--batch_size', type=int, default=20, metavar='N',
-                        help='batch size')
-    parser.add_argument('--bptt', type=int, default=35,
-                        help='sequence length')
-    parser.add_argument('--dropout', type=float, default=0.2,
-                        help='dropout applied to layers (0 = no dropout)')
-    parser.add_argument('--tied', action='store_true',
-                        help='tie the word embedding and softmax weights')
-    parser.add_argument('--seed', type=int, default=1111,
-                        help='random seed')
-    parser.add_argument('--cuda', action='store_true',
-                        help='use CUDA')
-    parser.add_argument('--log-interval', type=int, default=200, metavar='N',
-                        help='report interval')
-    parser.add_argument('--save', type=str, default='model_dir',
-                        help='path to save the final model and dictionary')
-    parser.add_argument('--train_size', type=int, default=-1, metavar='N',
-                        help='train size')
-    parser.add_argument('--valid_size', type=int, default=-1, metavar='N',
-                        help='valid size')
-    parser.add_argument('--test_size', type=int, default=-1, metavar='N',
-                        help='test size')
-
-    parser.add_argument('--use_my_impl', action='store_true',
-                        help='use my implement')
-
-    args = parser.parse_args()
-    return args
-
-
 def check_device(args):
     if torch.cuda.is_available():
         if not args.cuda:
@@ -97,11 +95,8 @@ def check_device(args):
 
 
 def batchify(data, bsz, device):
-    # Work out how cleanly we can divide the dataset into bsz parts.
     nbatch = data.size(0) // bsz
-    # Trim off any extra elements that wouldn't cleanly fit (remainders).
     data = data.narrow(0, 0, nbatch * bsz)
-    # Evenly divide the data across the bsz batches.
     data = data.view(bsz, -1).t().contiguous()
     return data.to(device)
 
@@ -135,14 +130,3 @@ def evaluate(data_source, model, corpus, criterion, args, eval_batch_size):
             total_loss += len(data) * criterion(output_flat, targets).item()
             hidden = repackage_hidden(hidden)
     return total_loss / len(data_source)
-
-
-if __name__ == '__main__':
-    save_list = ['just', 'for', 'test']
-    save_dict = {'just': 0, 'for': 1, 'test': 2}
-    list_save(save_list, '1.txt')
-    load_list = list_load('1.txt')
-    print(load_list)
-    dict_save(save_dict, '2.txt')
-    load_dict = dict_load('2.txt')
-    print(load_dict)

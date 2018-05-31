@@ -5,16 +5,12 @@ import sys
 import torch
 import torch.nn as nn
 
-# from w_hw3.my_model import MyGRUModel
 import my_model
 sys.path.append('../')
 sys.path.append('../w_hw3')
-# import w_hw3.model as model
 import model
-# import w_hw3.utils as utils
 import utils
 import data
-
 import time
 
 start = time.time()
@@ -55,9 +51,9 @@ val_data = utils.batchify(corpus.valid, eval_batch_size, device)
 
 ntokens = len(corpus.dictionary)
 if args.use_my_impl:
-    model = my_model.MyGRUModel(args.model, ntokens, args.nembed, args.nhid, args.nlayers, args.dropout, args.tied)
+    model = my_model.MyGRUModel(ntokens, args.nembed, args.nhid, args.nlayers, args.dropout)
 else:
-    model = model.RNNModel(args.model, ntokens, args.nembed, args.nhid, args.nlayers, args.dropout, args.tied).to(device)
+    model = model.RNNModel(args.model, ntokens, args.nembed, args.nhid, args.nlayers, args.dropout).to(device)
 
 criterion = nn.CrossEntropyLoss()
 
@@ -67,12 +63,8 @@ criterion = nn.CrossEntropyLoss()
 ###############################################################################
 
 def train():
-    """
-    train RNN model with training data
-    :return: the training perplexity. For aligning with validation result, we only return the result of the first batch.
-    """
-    # Turn on training mode which enables dropout.
-    model.train()  # set the flags of conponents in model to be training: self.training = mode
+    # set the flags of conponents in model to be training: self.training = mode
+    model.train()
     total_loss = 0.
     start_time = time.time()
     ntokens = len(corpus.dictionary)
@@ -80,13 +72,10 @@ def train():
     ret_ppl = None
     for batch, i in enumerate(range(0, train_data.size(0) - 1, args.bptt)):
         data, targets = utils.get_batch(args, train_data, i)
-        # Starting each batch, we detach the hidden state from how it was previously produced.
-        # If we didn't, the model would try backpropagating all the way to start of the dataset.
         hidden = utils.repackage_hidden(hidden)
         model.zero_grad()
         output, hidden = model(data, hidden)
         loss = criterion(output.view(-1, ntokens), targets)
-        # loss.backward() computes dloss/dx for every parameter x which has requires_grad=True.
         loss.backward()
 
         # `clip_grad_norm` helps prevent the exploding gradient problem in RNNs / LSTMs.
@@ -114,7 +103,6 @@ def train():
 lr = args.lr
 best_val_loss = None
 
-# At any point you can hit Ctrl + C to break out of training early.
 try:
     result = []
     for epoch in range(1, args.epochs + 1):

@@ -32,12 +32,6 @@ class Corpus(object):
         self.train = None
         self.valid = None
         self.test = None
-        # if "train" in corpus_types:
-        #     self.train = self.tokenize(os.path.join(path, 'train.txt'), train_size)
-        # if "valid" in corpus_types:
-        #     self.valid = self.tokenize(os.path.join(path, 'valid.txt'), valid_size)
-        # if "test" in corpus_types:
-        #     self.test = self.tokenize(os.path.join(path, 'test.txt'), valid_size)
 
     def set_train(self, path, train_size=-1):
         self.train = self.tokenize(path, train_size)

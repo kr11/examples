@@ -2,13 +2,12 @@ import math
 import torch
 import torch.nn as nn
 from torch.nn import Parameter
-# from torch.nn import functional as F
 
 
 class MyGRUModel(nn.Module):
     """Container module with an encoder, a recurrent module, and a decoder."""
 
-    def __init__(self, rnn_type, n_token, n_input, n_hid, n_layers, dropout=0.5, tie_weights=False):
+    def __init__(self, n_token, n_input, n_hid, n_layers, dropout=0.5):
         super(MyGRUModel, self).__init__()
         self.drop_rate = dropout
         self.drop = nn.Dropout(dropout)
@@ -24,7 +23,6 @@ class MyGRUModel(nn.Module):
         self.w_inputs = []
         self.w_hiddens = []
         self.b_inputs = []
-        # self.b_hiddens = []
         gate_size = 3 * n_hid
         self._all_weights = []
         for layer in range(n_layers):
@@ -32,17 +30,14 @@ class MyGRUModel(nn.Module):
             w_ih = Parameter(torch.Tensor(gate_size, layer_input_size))
             w_hh = Parameter(torch.Tensor(gate_size, n_hid))
             b_ih = Parameter(torch.Tensor(gate_size))
-            # b_hh = Parameter(torch.Tensor(gate_size))
 
             setattr(self, 'w_ih' + str(layer), w_ih)
             setattr(self, 'w_hh' + str(layer), w_hh)
             setattr(self, 'b_ih' + str(layer), b_ih)
-            # setattr(self, 'b_hh' + str(layer), b_hh)
 
             self.w_inputs.append(w_ih)
             self.w_hiddens.append(w_hh)
             self.b_inputs.append(b_ih)
-            # self.b_hiddens.append(b_hh)
 
         self.reset_parameters()
         self.init_weights()
@@ -79,7 +74,6 @@ class MyGRUModel(nn.Module):
             input = torch.cat(all_output, input.dim() - 1)
             if l < self.n_layers - 1:
                 input = self.drop(input)
-                # input = F.dropout(input, p=self.drop_rate, training=self.training, inplace=False)
 
         next_hidden = torch.cat(next_hidden, 0).view(self.n_layers, *next_hidden[0].size())
         return next_hidden, input
@@ -94,27 +88,15 @@ class MyGRUModel(nn.Module):
         return hidden, output
 
     def gru_cell(self, input, hidden, layer):
-        # tmp = self.get_all_weights()
-        # w_input = tmp[layer][0]
-        # w_hidden = tmp[layer][1]
-        # b_input = tmp[layer][2]
-        # b_hidden = tmp[layer][3]
-
         w_input = self.w_inputs[layer]
         w_hidden = self.w_hiddens[layer]
         b_input = self.b_inputs[layer]
-        # b_hidden = self.b_hiddens[layer]
-        # gi = F.linear(input, w_input, b_input)
-        # gh = F.linear(hidden, w_hidden, b_hidden)
         gi = torch.addmm(b_input, input, w_input.t())
         gh = hidden.matmul(w_hidden.t())
-        # gh = torch.addmm(b_hidden, hidden, w_hidden.t())
         i_r, i_i, i_n = gi.chunk(3, 1)
         h_r, h_i, h_n = gh.chunk(3, 1)
 
-        # resetgate = F.sigmoid(i_r + h_r)
         resetgate = (i_r + h_r).sigmoid()
-        # inputgate = F.sigmoid(i_i + h_i)
         updategate = (i_i + h_i).sigmoid()
         temp_hidden = (i_n + resetgate * h_n).tanh()
         hew_hidden = temp_hidden + updategate * (hidden - temp_hidden)
