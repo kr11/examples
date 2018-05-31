@@ -55,9 +55,9 @@ val_data = utils.batchify(corpus.valid, eval_batch_size, device)
 
 ntokens = len(corpus.dictionary)
 if args.use_my_impl:
-    model = my_model.MyGRUModel(args.model, ntokens, args.emsize, args.nhid, args.nlayers, args.dropout, args.tied)
+    model = my_model.MyGRUModel(args.model, ntokens, args.nembed, args.nhid, args.nlayers, args.dropout, args.tied)
 else:
-    model = model.RNNModel(args.model, ntokens, args.emsize, args.nhid, args.nlayers, args.dropout, args.tied).to(device)
+    model = model.RNNModel(args.model, ntokens, args.nembed, args.nhid, args.nlayers, args.dropout, args.tied).to(device)
 
 criterion = nn.CrossEntropyLoss()
 
@@ -127,7 +127,8 @@ try:
                                          val_loss, math.exp(val_loss)))
         print('-' * 80)
         # Save the model if the validation loss is the best we've seen so far.
-        if not best_val_loss or val_loss < best_val_loss:
+        if best_val_loss is None or val_loss < best_val_loss:
+            print('save model!')
             with open(os.path.join(args.save, 'model.pt'), 'wb') as f:
                 torch.save(model, f)
             best_val_loss = val_loss
