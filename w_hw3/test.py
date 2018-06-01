@@ -3,17 +3,14 @@
 import math
 import os
 
-import sys
-import torch.onnx
+import torch
+
 from torch import nn
 import time
 
 import data
 
-sys.path.append('../')
-sys.path.append('../w_hw3')
-
-import w_hw3.utils as utils
+import utils
 
 start = time.time()
 

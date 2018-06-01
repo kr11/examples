@@ -6,8 +6,6 @@ import torch
 import torch.nn as nn
 
 import my_model
-sys.path.append('../')
-sys.path.append('../w_hw3')
 import model
 import utils
 import data
@@ -29,8 +27,8 @@ print("start!====")
 # Set the random seed manually for reproducibility.
 torch.manual_seed(args.seed)
 device = utils.check_device(args)
-if args.use_my_impl:
-    print("train by my implement!")
+if args.use_MyGRU:
+    print("train by MyGRU!")
 ###############################################################################
 # Load data
 ###############################################################################
@@ -50,7 +48,7 @@ val_data = utils.batchify(corpus.valid, eval_batch_size, device)
 ###############################################################################
 
 ntokens = len(corpus.dictionary)
-if args.use_my_impl:
+if args.use_MyGRU:
     model = my_model.MyGRUModel(ntokens, args.nembed, args.nhid, args.nlayers, args.dropout)
 else:
     model = model.RNNModel(args.model, ntokens, args.nembed, args.nhid, args.nlayers, args.dropout).to(device)
@@ -69,7 +67,7 @@ def train():
     start_time = time.time()
     ntokens = len(corpus.dictionary)
     hidden = model.init_hidden(args.batch_size)
-    ret_ppl = None
+    ret_ppl = -1
     for batch, i in enumerate(range(0, train_data.size(0) - 1, args.bptt)):
         data, targets = utils.get_batch(args, train_data, i)
         hidden = utils.repackage_hidden(hidden)
